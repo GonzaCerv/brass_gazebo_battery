@@ -49,62 +49,42 @@ sudo make install
 
 # Usage
 
-In the brass.world file, `libbattery_discharge.so` is mentioned as a plugin. 
-This implied that plugin is initialized and loaded when `p2-cp1.world` is opened in Gazebo. 
-The xml code could be linked to any model in a new `.world` file.
-```xml
-<model name="battery_demo_model">
-    <pose>0 0 0 0 0 0</pose>
-    <static>false</static>
-    <link name="body">
-    <battery name="brass_battery">
-        <voltage>12.592</voltage>
-    </battery>
-    </link>
-<plugin name="battery" filename="libbattery_discharge.so">
-    <ros_node>battery_monitor_client</ros_node>
-    <link_name>body</link_name>
-    <battery_name>linear_battery</battery_name>
-    <constant_coef>12.694</constant_coef>
-    <linear_coef>-3.1424</linear_coef>
-    <initial_charge>1.1665</initial_charge>
-    <capacity>1.2009</capacity>
-    <resistance>0.061523</resistance>
-    <smooth_current_tau>1.9499</smooth_current_tau>
-    <charge_rate>0.2</charge_rate>
-</plugin>
-<plugin name="consumer" filename="libbattery_consumer.so">
-    <link_name>body</link_name>
-    <battery_name>linear_battery</battery_name>
-    <power_load>6.6</power_load>
-</plugin>
-</model>
+A xacro file has been created to include this plugin easily. 
+
+In your *.urdf.xacro file include this line at the top
+
+```
+  <xacro:include filename="$(find brass_gazebo_battery)/urdf/battery.xacro"/>
 ```
 
-# Run the Plugin
-```bash
-cd ~/catkin_ws/src/brass_gazebo_battery/
-gazebo test/worlds/p2-cp1.world --verbose
+Add then an instance of the battery 
 ```
-
+  <xacro:battery_plugin name="battery" /> 
+```
 
 # Exposed ROS services and topics
 
 This Gazebo plugin expose several services that can be accessed via ROS:
 
 ```
-/battery_monitor_client/battery_demo_model/set_charge
-/battery_monitor_client/battery_demo_model/set_charge_rate
-/battery_monitor_client/battery_demo_model/set_charging
-/battery_monitor_client/battery_demo_model/set_model_coefficients
-/battery_monitor_client/battery_demo_model/set_power_load
+/battery_monitor_client/robot/battery_discharged
+/battery_monitor_client/robot/charge_level 
+/battery_monitor_client/robot/charge_level_mwh               
+/battery_monitor_client/robot/reset_battery
 ```
+- You can check the charge level of the battery by subscribing to `charge_level` and `charge_level_mwh`.
+- A `std_msgs/bool => true` will be published in `battery_discharged` when the battery is completely discharged.
+- If you wish to restore the battery to its initial state, you can publish `std_msgs/empty` in the `reset_battery` topic.
 
-Also, this publish information about the status of robot battery to the following topics:
+Also, it is possible to change the behavior of the topic by publishing in the following services:
 ```
-/mobile_base/commands/charge_level
-/mobile_base/commands/motor_power
+/battery_monitor_client/robot/set_charge
+/battery_monitor_client/robot/set_charge_rate
+/battery_monitor_client/robot/set_charging
+/battery_monitor_client/robot/set_model_coefficients
+
 ```
+- By calling `set_charging` with `true`, you can recharge the battery.
 
 # Extending ROS Services
 

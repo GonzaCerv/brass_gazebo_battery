@@ -1,3 +1,14 @@
+/**
+ * @file battery_discharge.hh
+ * @author Gonzalo Cervetti (g.cervetti@ekumenlabs.com)
+ * @brief Simulates the discharge model of a battery
+ * @version 0.1
+ * @date 2020-08-04
+ *
+ * @copyright Copyright (c) 2020
+ *
+ */
+
 #ifndef BRASS_GAZEBO_BATTERY_BATTERY_DISCHARGE_H
 #define BRASS_GAZEBO_BATTERY_BATTERY_DISCHARGE_H
 
@@ -11,6 +22,7 @@
 #include "ros/callback_queue.h"
 #include <boost/thread/mutex.hpp>
 #include "std_msgs/Bool.h"
+#include "std_msgs/Empty.h"
 #include "brass_gazebo_battery/SetCharge.h"
 #include "brass_gazebo_battery/SetCharging.h"
 #include "brass_gazebo_battery/SetCoef.h"
@@ -18,6 +30,7 @@
 
 #define BATTERY_DEBUG
 #define DBG_INTERVAL 5.0
+#define THERMAL_RESISTANCE 0.6
 
 namespace gazebo
 {
@@ -49,6 +62,8 @@ namespace gazebo
 
     public: bool SetChargingRate(brass_gazebo_battery::SetChargingRate::Request& req,
                                  brass_gazebo_battery::SetChargingRate::Response& res);
+
+    public: void BatteryResetCallback(const std_msgs::Empty &msg);
 
     // Connection to the World Update events.
     protected: event::ConnectionPtr updateConnection;
@@ -96,12 +111,16 @@ namespace gazebo
     // Instantaneous battery charge in Ah.
     protected: double q;
 
+
     // This node is for ros communications
     protected: std::unique_ptr<ros::NodeHandle> rosNode;
 
     protected: ros::Publisher charge_state;
     protected: ros::Publisher charge_state_mwh;
     protected: ros::Publisher motor_power;
+    protected: ros::Publisher temperature_state;
+
+    protected: ros::Subscriber reset_battery;
 
     protected: ros::ServiceServer set_charging;
     protected: ros::ServiceServer set_charge;
@@ -113,6 +132,8 @@ namespace gazebo
     protected: bool charging;
 
     protected: double sim_time_now;
+
+    protected: ros::Time last_time_step;
 
     };
 }

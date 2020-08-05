@@ -47,6 +47,7 @@ find_package(ignition-math2 REQUIRED)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -158,12 +159,12 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
     ADD_DEFINITIONS(-fPIC)
 ENDIF()
 
-add_library(battery_discharge SHARED src/battery_discharge.cpp src/ROS_debugging.h)
+add_library(battery_discharge SHARED src/battery_discharge.cpp )
 add_dependencies(battery_discharge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(battery_discharge ${roscpp_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${IGNITION-MATH_LIBRARIES})
 
 # Important: add ${roscpp_LIBRARIES} to the target_link_library if you are using ros libraries as we use in the battery plugin
-add_library(battery_consumer SHARED src/battery_consumer.cpp src/ROS_debugging.h)
+add_library(battery_consumer SHARED src/battery_consumer.cpp )
 add_dependencies(battery_consumer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(battery_consumer ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${IGNITION-MATH_LIBRARIES})
 
